@@ -1,11 +1,46 @@
 const inquirer = require('inquirer');
+const mysql = require('mysql');
+
+const orm = require( './orm' );
+
+class Database {
+    constructor( config ) {
+        this.connection = mysql.createConnection( config );
+    }
+    query( sql, args=[] ) {
+        return new Promise( ( resolve, reject ) => {
+            this.connection.query( sql, args, ( err, rows ) => {
+                if ( err )
+                    return reject( err );
+                resolve( rows );
+            } );
+        } );
+    }
+    close() {
+        return new Promise( ( resolve, reject ) => {
+            this.connection.end( err => {
+                if ( err )
+                    return reject( err );
+                resolve();
+            } );
+        } );
+    }
+  }
+// at top INIT DB connection
+const db = new Database({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "root",
+    database: "employee_management"
+});
 
 class Employee {
-    constructor( firstName, lastName, roleId, managerId ){
+    constructor( firstName, lastName, roleId ){
         this.firstName = firstName, 
         this.lastName = lastName, 
-        this.roleId = roleId, 
-        this.managerId = managerId
+        this.roleId = roleId
+        // this.managerId = managerId // add back managerId to inputs 
     }
 };
 
@@ -20,25 +55,24 @@ async function main(){
             name: 'initPrompt',
             message: "What would you like to do?",
             type: 'list',
-            choices: ['Add Departments', 'View Departments', 'Add Roles', 'View Roles', 'Add Employees', 'View Employees', 'Update Employees', 'QUIT']
+            choices: ['Add Department', 'View Departments', 'Add Role', 'View Roles', 'Add Employee', 'View Employees', 'Update Employees', 'QUIT']
         }
     ])
     let initResp = resp.initPrompt;
-    console.log(initResp);
 
     if( initResp == "QUIT"){
     process.exit(0);
-    } if( initResp == "Add Departments"){
+    } if( initResp == "Add Department"){
         addDepartments();
     } if( initResp == "View Departments"){
         viewDepartments();
-    } if( initResp == "Add Roles"){
+    } if( initResp == "Add Role"){
         addRoles();
     } if( initResp == "View Roles"){
         viewRoles();
     } if( initResp == "View Employees"){
         viewEmployees();
-    } if( initResp == "Add Employees"){
+    } if( initResp == "Add Employee"){
         addEmployees();
     } if( initResp == "Update Employees"){
         updateEmployees();
@@ -82,17 +116,27 @@ async function addEmployees(){
         }
     ])
 
-    const firstName = resp.firstName;
-    const lastName = resp.lastName;
-    const role = resp.role;
-
-    console.log(firstName, lastName, role)
+    const addEmployee = new Employee( resp.firstName, resp.lastName, resp.role );
+    console.log("[NEW EMPLOYEE]", addEmployee )
+    
+    await orm.createEmployee( addEmployee );
+    console.log(`Added: ${resp.firstName} ${resp.lastName}`);
+    await main();
 
 };
 
-
 async function viewEmployees(){
     console.log("[>>> viewEmployees Fn ]")
+    const employeeList = await orm.displayEmployees();
+    
+    employeeList.forEach( (row) => {
+        console.log(`${row.first_name} ${row.last_name} ${row.role_id}`)
+    })
+    
+
+    
+
+    await main();
 };
 
 
