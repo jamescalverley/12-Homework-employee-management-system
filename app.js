@@ -55,7 +55,7 @@ async function main(){
             name: 'initPrompt',
             message: "What would you like to do?",
             type: 'list',
-            choices: ['Add Department', 'View Departments', 'Add Role', 'View Roles', 'Add Employee', 'View Employees', 'Update Employees', 'QUIT']
+            choices: ['Add Department', 'View Departments', 'Add Role', 'View Roles', 'Add Employee', 'Delete Employee', 'View Employees', 'Update Employees', 'QUIT']
         }
     ])
     let initResp = resp.initPrompt;
@@ -74,6 +74,8 @@ async function main(){
         viewEmployees();
     } if( initResp == "Add Employee"){
         addEmployees();
+    } if( initResp == "Delete Employee"){
+        deleteEmployee();
     } if( initResp == "Update Employees"){
         updateEmployees();
     }
@@ -115,16 +117,13 @@ async function addEmployees(){
             type: 'input'
         }
     ])
-
     const addEmployee = new Employee( resp.firstName, resp.lastName, resp.role );
     console.log("[NEW EMPLOYEE]", addEmployee )
     
     await orm.createEmployee( addEmployee );
     console.log(`Added: ${resp.firstName} ${resp.lastName}`);
     await main();
-
 };
-
 async function viewEmployees(){
     console.log("[>>> viewEmployees Fn ]")
     const employeeList = await orm.displayEmployees();
@@ -132,14 +131,32 @@ async function viewEmployees(){
     employeeList.forEach( (row) => {
         console.log(`${row.first_name} ${row.last_name} ${row.role_id}`)
     })
-    
-
-    
-
     await main();
 };
+async function deleteEmployee(){
+    console.log("[>>> deleteEmployee Fn ]")
+    const employeeList = await orm.displayEmployees();
+    console.log("[employee list]", employeeList)
+    const displayList = [];
+
+    employeeList.forEach( (row) => {
+        displayList.push((`${row.first_name} ${row.last_name}   ID: ${row.id}`))
+    })
+
+    const resp = await inquirer.prompt([
+        {
+            name: 'toDelete',
+            message: "Which employee would you like to delete?",
+            type: 'list', 
+            choices: displayList
+        }
+    ])
+    const toDelete = resp.toDelete;
+    console.log("[employee to delete:]", toDelete)
 
 
+    // await orm.deleteEmployee( employee );
+}
 
 
 
