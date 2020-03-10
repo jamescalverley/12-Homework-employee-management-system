@@ -35,12 +35,22 @@ const db = new Database({
     database: "employee_management"
 });
 
+
+//* Classes ==============
 class Employee {
     constructor( firstName, lastName, roleId ){
         this.firstName = firstName, 
         this.lastName = lastName, 
         this.roleId = roleId
         // this.managerId = managerId // add back managerId to inputs 
+    }
+};
+
+class Role {
+    constructor( title, salary, department ){
+        this.title = title,
+        this.salary = salary,
+        this.department = department
     }
 };
 
@@ -91,10 +101,44 @@ async function viewDepartments(){
 
 async function addRoles(){
     console.log("[>>> addRoles Fn ]")
+
+    const resp = await inquirer.prompt([
+        {
+            name: 'titleAdd',
+            message: 'What role would you like to add?',
+            type: 'input'
+        },
+        {
+            name: 'salaryAdd',
+            message: 'What is the salary for the role?',
+            type: 'input'
+        },
+        {
+            name: 'departAdd',
+            message: 'What department is this role in?',
+            type: 'input'
+        }
+    ])
+
+    const newRole = new Role( resp.titleAdd, resp.salaryAdd, resp.departAdd );
+    console.log("[NEW ROLE]", newRole )
+
+    await orm.addRole( newRole);
+
+    console.log(`Added Role: ${resp.titleAdd}`);
+
+    await main();
 };
 
 async function viewRoles(){
     console.log("[>>> viewRoles Fn ]")
+
+    const roleDisplayList = await orm.displayRoles();
+    
+    roleDisplayList.forEach( (row) => {
+        console.log(`${row.title} ${row.salary} ${row.dept_id}`)
+    })
+    await main();
 };
 
 async function addEmployees(){
@@ -121,14 +165,15 @@ async function addEmployees(){
     console.log("[NEW EMPLOYEE]", addEmployee )
     
     await orm.createEmployee( addEmployee );
-    console.log(`Added: ${resp.firstName} ${resp.lastName}`);
+    console.log(`Added Employee: ${resp.firstName} ${resp.lastName}`);
+
     await main();
 };
 async function viewEmployees(){
     console.log("[>>> viewEmployees Fn ]")
-    const employeeList = await orm.displayEmployees();
+    const employeeDisplayList = await orm.displayEmployees();
     
-    employeeList.forEach( (row) => {
+    employeeDisplayList.forEach( (row) => {
         console.log(`${row.first_name} ${row.last_name} ${row.role_id}`)
     })
     await main();
@@ -139,9 +184,15 @@ async function deleteEmployee(){
     console.log("[employee list]", employeeList)
     const displayList = [];
 
+    // employeeList.forEach( (row) => {
+    //     displayList.push((`${row.first_name} ${row.last_name}   ID: ${row.id}`))
+    // })
+
     employeeList.forEach( (row) => {
-        displayList.push((`${row.first_name} ${row.last_name}   ID: ${row.id}`))
+        displayList.push({row})
     })
+
+    const testList = ['{name: "James", role: "developer"}', '{name: "Claude", role: "CEO"}'];
 
     const resp = await inquirer.prompt([
         {
@@ -156,7 +207,7 @@ async function deleteEmployee(){
 
 
     // await orm.deleteEmployee( employee );
-}
+};
 
 
 

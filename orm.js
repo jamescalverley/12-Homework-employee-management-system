@@ -31,13 +31,26 @@ const db = new Database({
     password: "root",
     database: "employee_management"
 });
+async function addRole( role ){
+    const roleAdd = await db.query(
+        'INSERT INTO roles (title,salary,dept_id) VALUES(?,?,?)', [role.title, role.salary, role.department])
+    console.log("[ADDED to db]", role.title);
+    return roleAdd
+};
+async function displayRoles(){
+    console.log("displaying roles");
+    const roleList = await db.query(
+        'SELECT * FROM roles ORDER BY id')
+    return roleList
+}
+
 
 async function createEmployee( employee ){
     let employeeTest = [employee.firstName, employee.lastName, employee.roleId];
     console.log("[orm employee data to add]", employeeTest);
     const employeeAdd = await db.query(
         'INSERT INTO employees (first_name,last_name,role_id) VALUES(?,?,?)', [employee.firstName, employee.lastName, employee.roleId]);
-    console.log("[ADDED TO db]")
+    console.log("[ADDED TO db]", employee.firstName)
     return employeeAdd
 };
 
@@ -62,6 +75,8 @@ async function deleteEmployee( employee ){
 module.exports = {
     createEmployee,
     displayEmployees,
-    deleteEmployee
+    deleteEmployee,
+    addRole,
+    displayRoles
 }
     
