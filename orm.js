@@ -56,7 +56,6 @@ async function createEmployee( employee ){
 
 async function displayEmployees(){
     console.log("[displaying employees]");
-
     const employeeList = await db.query(
         'SELECT * FROM employees ORDER BY id')
     return employeeList

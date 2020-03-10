@@ -182,17 +182,12 @@ async function deleteEmployee(){
     console.log("[>>> deleteEmployee Fn ]")
     const employeeList = await orm.displayEmployees();
     console.log("[employee list]", employeeList)
+    
     const displayList = [];
 
-    // employeeList.forEach( (row) => {
-    //     displayList.push((`${row.first_name} ${row.last_name}   ID: ${row.id}`))
-    // })
-
     employeeList.forEach( (row) => {
-        displayList.push({row})
+        displayList.push((`${row.first_name} ${row.last_name}  ID: ${row.id}`))
     })
-
-    const testList = ['{name: "James", role: "developer"}', '{name: "Claude", role: "CEO"}'];
 
     const resp = await inquirer.prompt([
         {
@@ -205,11 +200,8 @@ async function deleteEmployee(){
     const toDelete = resp.toDelete;
     console.log("[employee to delete:]", toDelete)
 
-
-    // await orm.deleteEmployee( employee );
+    await orm.deleteEmployee( toDelete );
 };
-
-
 
 async function updateEmployees(){
     console.log("[>>> updateEmployees Fn ]")
